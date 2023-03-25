@@ -64,6 +64,60 @@ class _MyHomePageState extends State<MyHomePage> {
         });
   }
 
+  Future<void> editDialog(
+      NotesModel notesModel, String title, String description) async {
+    titleCtrl.text = title;
+    descriptionCtrl.text = description;
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Edit Notes"),
+            content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: titleCtrl,
+                    decoration: InputDecoration(
+                        hintText: 'Enter Title', border: OutlineInputBorder()),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  TextFormField(
+                    controller: descriptionCtrl,
+                    decoration: InputDecoration(
+                        hintText: 'Enter Description',
+                        border: OutlineInputBorder()),
+                  )
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Cancel')),
+              TextButton(
+                  onPressed: () async{
+                    notesModel.title=titleCtrl.text.toString();
+                    notesModel.description=descriptionCtrl.text.toString();
+                    notesModel.save();
+                    titleCtrl.clear();
+                    descriptionCtrl.clear();
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Edit')),
+            ],
+          );
+        });
+  }
+
+  Future<void> deleteItem(NotesModel notesModel) async {
+    await notesModel.delete();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,11 +137,30 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           vertical: 15, horizontal: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          Text(data[index].title.toString()),
-                          Text(data[index].description.toString())
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(data[index].title.toString()),
+                              Text(data[index].description.toString())
+                            ],
+                          ),
+                          const Spacer(),
+                          IconButton(onPressed: () {
+                            editDialog(data[index], data[index].title.toString(), data[index].description.toString());
+                          }, icon: Icon(Icons.edit)),
+                          const SizedBox(
+                            width: 15,
+                          ),
+                          IconButton(
+                              onPressed: () {
+                                deleteItem(data[index]);
+                              },
+                              icon: Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                              )),
                         ],
                       ),
                     ),
